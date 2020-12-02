@@ -213,7 +213,7 @@ char * get_libdl_version(){
     char * sshd_pid;
     char * result;
     sshd_pid=get_sshd_pid();
-    sprintf(command," cat /proc/999/maps|grep libdl|awk -F '/' '{print$4}'|sort|uniq",sshd_pid);
+    sprintf(command," cat /proc/%s/maps|grep libdl|awk -F '/' '{print$4}'|sort|uniq",sshd_pid);
     result=execshell(command);
     result[strlen(result)-1]=0;
     printf(">>> %s \n",result);
